@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Podrão - Cardápio de Lanches</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #5a4a3a;
+            --secondary-color: #e0c888;
+            --background-color: #FFF3CD;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 80px;
+        }
+
+        /* Navbar Estilizada */
+        .navbar-custom {
+            background: linear-gradient(135deg, #d2a679 0%, #b78a5a 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px 0;
+        }
+
+        .navbar-brand img {
+            height: 60px;
+            transition: transform 0.3s;
+        }
+
+        .navbar-brand img:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            margin: 0 8px;
+            position: relative;
+            padding: 8px 12px !important;
+        }
+
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+
+        .nav-link[href="carrinho.html"]::after {
+            display: none;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .cart-panel {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 20px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        .cart-header {
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .remove-item {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .menu-header {
+            text-align: center;
+            margin: 40px 0 30px;
+            position: relative;
+        }
+
+        .menu-title {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            display: inline-block;
+        }
+
+        .menu-title::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background: var(--secondary-color);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 0 20px 40px;
+        }
+
+        .food-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .food-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .food-img {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+
+        .food-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--danger-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .food-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 200px);
+        }
+
+        .food-title {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .food-price {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+
+        .food-ingredients {
+            color: #555;
+            flex-grow: 1;
+            margin-bottom: 15px;
+        }
+
+        .ingredient-item {
+            margin-bottom: 5px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .ingredient-item::before {
+            content: "•";
+            color: var(--secondary-color);
+            position: absolute;
+            left: 0;
+        }
+
+        .add-to-cart {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .quantity-select {
+            width: 80px;
+            margin-right: 15px;
+            border: 1px solid var(--secondary-color);
+            border-radius: 5px;
+            padding: 8px;
+        }
+
+        .add-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            flex-grow: 1;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        .footer-logo {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+
+        .footer-title {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .footer-contact i {
+            color: var(--secondary-color);
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .footer-divider {
+            border-color: rgba(255,255,255,0.1) !important;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            .menu-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .cart-panel {
+                width: 90%;
+                left: 5%;
+                right: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="Podrao.html">
+                <img src="Logo_Meu_podrão_ok.png" alt="Meu Podrão">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="Podrao.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="combos.html">Combos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="lanches.html">Lanches</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="bebidas.html">Bebidas</a>
+                    </li>
+                </ul>
+                <a class="nav-link" href="carrinho.html">
+                    <img src="https://cdn-icons-png.flaticon.com/512/263/263142.png" height="30" alt="Carrinho">
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="carrinho-painel" class="cart-panel">
+        <h5 class="cart-header">Seu Pedido</h5>
+        <div id="carrinho-itens">
+            <div class="text-center py-3">
+                <i class="fas fa-shopping-cart fa-2x mb-3" style="color: #ddd;"></i>
+                <p class="mb-0">Carrinho vazio</p>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="menu-header">
+            <h1 class="menu-title">Nossos Lanches</h1>
+        </div>
+
+        <div class="menu-container">
+            <div class="food-card" data-produto-id="1" data-produto-preco="10.00">
+                <div class="position-relative">
+                    <img src="X-Burguer.png" class="food-img" alt="X-Burguer">
+                    <span class="food-badge">Mais Pedido</span>
+                </div>
+                <div class="food-body">
+                    <h3 class="food-title">X-Burguer</h3>
+                    <div class="food-price">R$ 10,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">Carne artesanal</div>
+                        <div class="ingredient-item">2x Mussarela</div>
+                        <div class="ingredient-item">Cebola</div>
+                        <div class="ingredient-item">Picles</div>
+                        <div class="ingredient-item">Ketchup</div>
+                        <div class="ingredient-item">Mostarda</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" data-produto-id="2" data-produto-preco="15.00">
+                <img src="X-salada lanche.png" class="food-img" alt="X-Salada">
+                <div class="food-body">
+                    <h3 class="food-title">X-Salada</h3>
+                    <div class="food-price">R$ 15,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">Carne artesanal</div>
+                        <div class="ingredient-item">Mussarela</div>
+                        <div class="ingredient-item">Alface</div>
+                        <div class="ingredient-item">Tomate</div>
+                        <div class="ingredient-item">Molho especial</div>
+                        <div class="ingredient-item">Batata palha</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="food-card" data-produto-id="3" data-produto-preco="17.00">
+                <div class="position-relative">
+                    <img src="lanche x-egg.png" class="food-img" alt="X-Egg">
+                    <span class="food-badge" style="background: #17a2b8;">Novo</span>
+                </div>
+                <div class="food-body">
+                    <h3 class="food-title">X-Egg</h3>
+                    <div class="food-price">R$ 17,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">Carne artesanal</div>
+                        <div class="ingredient-item">2 Ovos</div>
+                        <div class="ingredient-item">Mussarela</div>
+                        <div class="ingredient-item">Alface</div>
+                        <div class="ingredient-item">Tomate</div>
+                        <div class="ingredient-item">Molho especial</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="food-card" data-produto-id="4" data-produto-preco="18.00">
+                <img src="x-bacon.png" class="food-img" alt="X-Bacon">
+                <div class="food-body">
+                    <h3 class="food-title">X-Bacon</h3>
+                    <div class="food-price">R$ 18,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">Carne artesanal</div>
+                        <div class="ingredient-item">100g de bacon</div>
+                        <div class="ingredient-item">Mussarela</div>
+                        <div class="ingredient-item">Alface</div>
+                        <div class="ingredient-item">Tomate</div>
+                        <div class="ingredient-item">Molho especial</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="food-card" data-produto-id="5" data-produto-preco="20.00">
+                <img src="x-frango.jpg" class="food-img" alt="X-Frango">
+                <div class="food-body">
+                    <h3 class="food-title">X-Frango</h3>
+                    <div class="food-price">R$ 20,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">200g Filé de frango</div>
+                        <div class="ingredient-item">Milho</div>
+                        <div class="ingredient-item">Mussarela</div>
+                        <div class="ingredient-item">Alface</div>
+                        <div class="ingredient-item">Tomate</div>
+                        <div class="ingredient-item">Molho especial</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="food-card" data-produto-id="6" data-produto-preco="25.00">
+                <div class="position-relative">
+                    <img src="x-tudo lanche.png" class="food-img" alt="X-Tudo">
+                    <span class="food-badge">Recomendado</span>
+                </div>
+                <div class="food-body">
+                    <h3 class="food-title">X-Tudo</h3>
+                    <div class="food-price">R$ 25,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">Carne artesanal</div>
+                        <div class="ingredient-item">Mussarela</div>
+                        <div class="ingredient-item">Alface</div>
+                        <div class="ingredient-item">Tomate</div>
+                        <div class="ingredient-item">Molho especial</div>
+                        <div class="ingredient-item">Batata palha</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="food-card" data-produto-id="7" data-produto-preco="25.00">
+                <img src="x-tudo duplo.jpeg" class="food-img" alt="X-Tudo Duplo">
+                <div class="food-body">
+                    <h3 class="food-title">X-Tudo Duplo</h3>
+                    <div class="food-price">R$ 25,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">2x Carne artesanal</div>
+                        <div class="ingredient-item">Mussarela</div>
+                        <div class="ingredient-item">Presunto</div>
+                        <div class="ingredient-item">Calabresa</div>
+                        <div class="ingredient-item">Bacon</div>
+                        <div class="ingredient-item">2 Ovos</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="food-card" data-produto-id="8" data-produto-preco="30.00">
+                <div class="position-relative">
+                    <img src="lanche contra file.png" class="food-img" alt="X-Contra Filé">
+                    <span class="food-badge" style="background: #6c757d;">Premium</span>
+                </div>
+                <div class="food-body">
+                    <h3 class="food-title">X-Contra Filé</h3>
+                    <div class="food-price">R$ 30,00</div>
+                    <div class="food-ingredients">
+                        <div class="ingredient-item">Contra filé 180g</div>
+                        <div class="ingredient-item">100g de bacon</div>
+                        <div class="ingredient-item">Mussarela</div>
+                        <div class="ingredient-item">Alface</div>
+                        <div class="ingredient-item">Tomate</div>
+                        <div class="ingredient-item">Molho especial</div>
+                    </div>
+                    <div class="add-to-cart">
+                        <select class="quantity-select">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button class="add-btn btn-adicionar">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <img src="Logo_Meu_podrão_ok.png" class="footer-logo" alt="Logo">
+                    <p>Lanches artesanais feitos com ingredientes frescos e selecionados.</p>
+                    <div class="mt-3">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5 class="footer-title">Horário de Funcionamento</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-clock me-2"></i> Seg-Sex: 18h - 23h</li>
+                        <li class="mb-2"><i class="fas fa-clock me-2"></i> Sáb-Dom: 17h - 00h</li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5 class="footer-title">Contato</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-phone me-2"></i> (11) 98765-4321</li>
+                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Rua do Podrão, 123</li>
+                        <li><i class="fas fa-envelope me-2"></i> contato@meupodrao.com.br</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <p class="mb-0">&copy; 2025 Meu Podrão. Todos os direitos reservados.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-white mx-2">Política de Privacidade</a>
+                    <a href="#" class="text-white mx-2">Termos de Uso</a>
+                    <a href="#" class="text-white">Contato</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    const Carrinho = {
+        obter: function() {
+            return JSON.parse(localStorage.getItem('cart')) || [];
+        },
+        
+        salvar: function(carrinho) {
+            localStorage.setItem('cart', JSON.stringify(carrinho));
+            this.atualizarUI();
+        },
+        
+        adicionar: function(produtoId, produtoNome, produtoPreco, quantidade, produtoImagem) {
+            let carrinho = this.obter();
+            const itemExistente = carrinho.find(item => item.id === produtoId);
+            
+            if (itemExistente) {
+                itemExistente.quantity += parseInt(quantidade);
+            } else {
+                carrinho.push({
+                    id: produtoId,
+                    name: produtoNome,
+                    price: parseFloat(produtoPreco),
+                    image: produtoImagem,
+                    quantity: parseInt(quantidade)
+                });
+            }
+            
+            this.salvar(carrinho);
+        },
+        
+        remover: function(produtoId) {
+            let carrinho = this.obter();
+            carrinho = carrinho.filter(item => item.id !== produtoId);
+            this.salvar(carrinho);
+        },
+        
+        calcularTotal: function() {
+            return this.obter().reduce((total, item) => {
+                return total + (item.price * item.quantity);
+            }, 0);
+        },
+        
+        atualizarUI: function() {
+            const carrinho = this.obter();
+            const carrinhoItens = document.getElementById('carrinho-itens');
+            let html = '';
+            
+            if (carrinho.length > 0) {
+                html += '<div class="cart-items">';
+                
+                carrinho.forEach(item => {
+                    const subtotal = item.price * item.quantity;
+                    html += `
+                        <div class="cart-item">
+                            <div>
+                                <strong>${item.quantity}x</strong> ${item.name}
+                                <div class="text-muted small">R$ ${subtotal.toFixed(2)}</div>
+                            </div>
+                            <button class="remove-item btn-remover" data-id="${item.id}">×</button>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                html += `<div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+                            <h6 class="mb-0">Total:</h6>
+                            <h5 class="mb-0">R$ ${this.calcularTotal().toFixed(2)}</h5>
+                         </div>`;
+                html += '<a href="carrinho.html" class="btn btn-success w-100">Finalizar Pedido</a>';
+            } else {
+                html = '<div class="text-center py-3"><i class="fas fa-shopping-cart fa-2x mb-3" style="color: #ddd;"></i><p class="mb-0">Carrinho vazio</p></div>';
+            }
+            
+            carrinhoItens.innerHTML = html;
+            
+            document.querySelectorAll('.btn-remover').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const produtoId = e.target.getAttribute('data-id');
+                    this.remover(produtoId);
+                });
+            });
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        Carrinho.atualizarUI();
+        
+        document.querySelectorAll('.btn-adicionar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.food-card');
+                const produtoId = card.dataset.produtoId;
+                const produtoNome = card.querySelector('.food-title').textContent;
+                const produtoPreco = card.dataset.produtoPreco;
+                const produtoImagem = card.querySelector('.food-img').src;
+                const quantidade = card.querySelector('.quantity-select').value;
+                
+                Carrinho.adicionar(produtoId, produtoNome, produtoPreco, quantidade, produtoImagem);
+                
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check me-2"></i> Adicionado!';
+                this.classList.add('btn-success');
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.classList.remove('btn-success');
+                }, 2000);
+            });
+        });
+    });
+    </script>
+</body>
+</html>
